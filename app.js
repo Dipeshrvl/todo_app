@@ -2,12 +2,26 @@ const express = require("express");
 const app = express();
 const { Todo } = require("./models");
 const bodyParser = require("body-parser");
+const path = require("path");
 
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", (req, res) => {
-  res.send("Hello From Express Js");
+// set a view engine
+app.set("view engine", "ejs");
+
+// endpoints
+app.get("/", async (req, res) => {
+  // res.send("Hello From Express Js");
+  const allTodos = await Todo.getTodos();
+  if (req.accepts("html")) {
+    res.render("index", {
+      allTodos,
+    });
+  } else {
+    res.json({ allTodos });
+  }
 });
 
 app.get("/todos", async (req, res) => {
