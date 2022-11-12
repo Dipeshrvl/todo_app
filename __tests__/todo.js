@@ -47,4 +47,20 @@ describe("Test cases for Todo manager", () => {
 
     expect(parseData.completed).toBe(true);
   });
+
+  test("should delete a Todo", async () => {
+    const res = await agent.post("/todos").send({
+      title: "buy car",
+      dueDate: new Date().toLocaleDateString("en-CA"),
+      completed: false,
+    });
+
+    let parseData = JSON.parse(res.text);
+    const id = parseData.id;
+
+    console.log(id);
+    const deleteRes = await agent.delete(`/todos/${id}`).send();
+    console.log(Boolean(deleteRes.text));
+    expect(Boolean(deleteRes.text)).toBe(true);
+  });
 });

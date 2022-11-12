@@ -10,9 +10,15 @@ app.get("/", (req, res) => {
   res.send("Hello From Express Js");
 });
 
-app.get("/todos", (req, res) => {
-  console.log("Todo List");
-  res.send("<h1>Todo List</h1>");
+app.get("/todos", async (req, res) => {
+  try {
+    const todos = await Todo.findAll({
+      order: [["id", "ASC"]],
+    });
+    res.status(200).json(todos);
+  } catch (error) {
+    res.status(422).send(error);
+  }
 });
 
 app.post("/todos", async (req, res) => {
@@ -40,8 +46,19 @@ app.put("/todos/:id/markascompleted", async (req, res) => {
 });
 
 // eslint-disable-next-line no-unused-vars
-app.delete("/todos/:id", (req, res) => {
+app.delete("/todos/:id", async (req, res) => {
   console.log("Delete todos with Id : ", req.params.id);
+  try {
+    const rowCount = await Todo.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    res.send(rowCount ? true : false);
+  } catch (error) {
+    res.status(422).send(error);
+  }
 });
 
 module.exports = app;
