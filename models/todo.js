@@ -1,5 +1,5 @@
 "use strict";
-const { Model } = require("sequelize");
+const { Model, Op } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Todo extends Model {
     /**
@@ -12,11 +12,52 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     static addTodo({ title, dueDate }) {
-      return Todo.create({ title: title, dueDate: dueDate, completed: false });
+      return this.create({ title: title, dueDate: dueDate, completed: false });
     }
 
     static getTodos() {
-      return this.findAll();
+      return this.findAll({ order: [["id", "ASC"]] });
+    }
+
+    static overdue() {
+      return this.findAll({
+        where: {
+          dueDate: {
+            [Op.lt]: new Date().toLocaleDateString("en-CA"),
+          },
+        },
+        order: [["id", "ASC"]],
+      });
+    }
+
+    static dueToday() {
+      return this.findAll({
+        where: {
+          dueDate: {
+            [Op.eq]: new Date().toLocaleDateString("en-CA"),
+          },
+        },
+        order: [["id", "ASC"]],
+      });
+    }
+
+    static dueLater() {
+      return this.findAll({
+        where: {
+          dueDate: {
+            [Op.gt]: new Date().toLocaleDateString("en-CA"),
+          },
+        },
+        order: [["id", "ASC"]],
+      });
+    }
+
+    static remove(id) {
+      return this.destroy({
+        where: {
+          id: id,
+        },
+      });
     }
 
     markAsCompletd() {
