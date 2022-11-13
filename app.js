@@ -26,6 +26,7 @@ app.get("/", async (req, res) => {
   const overdue = await Todo.overdue();
   const dueToday = await Todo.dueToday();
   const dueLater = await Todo.dueLater();
+  const completdItems = await Todo.getCompletedItems();
 
   if (req.accepts("html")) {
     res.render("index", {
@@ -33,10 +34,11 @@ app.get("/", async (req, res) => {
       overdue,
       dueToday,
       dueLater,
+      completdItems,
       csrfToken: req.csrfToken(),
     });
   } else {
-    res.json({ overdue, dueToday, dueLater });
+    res.json({ overdue, dueToday, dueLater, completdItems });
     // res.json({allTodos})
   }
 });
@@ -65,11 +67,12 @@ app.post("/todos", async (req, res) => {
   }
 });
 
-app.put("/todos/:id/markascompleted", async (req, res) => {
+app.put("/todos/:id", async (req, res) => {
   console.log("Mark a todos as completd Id : ", req.params.id);
   const todo = await Todo.findByPk(req.params.id);
   try {
-    const updateTodo = await todo.markAsCompletd();
+    const status = todo.completed ? false : true;
+    const updateTodo = await todo.setCompletionStatus(status);
     res.status(200).json(updateTodo);
     // res.redirect("/");
   } catch (error) {
@@ -81,9 +84,10 @@ app.put("/todos/:id/markascompleted", async (req, res) => {
 app.delete("/todos/:id", async (req, res) => {
   console.log("Delete todos with Id : ", req.params.id);
   try {
-    await Todo.remove(req.params.id);
+    const deletedrow = await Todo.remove(req.params.id);
     // res.redirect("/");
-    res.json({ sucess: true });
+    // res.json({ sucess: true });
+    res.send(deletedrow ? true : false);
   } catch (error) {
     res.status(422).send(error);
   }

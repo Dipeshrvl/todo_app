@@ -12,7 +12,7 @@
       const token = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 
       const update = (id) => {
-        fetch(`/todos/${id}/markascompleted`, {
+        fetch(`/todos/${id}`, {
           method: "put",
           headers: {
             "Content-Type": "application/json",
@@ -89,10 +89,14 @@
           </div>
         </form>
         <%- include('todos.ejs',{title: "Overdue",data: overdue,countID :
-        "count-overdue"}) %> <%- include('todos.ejs',{title: "Due Today",data:
-        dueToday,countID : "count-due-today"}) %> <%-
+        "count-overdue"}) %> 
+        <%- include('todos.ejs',{title: "Due Today",data:
+        dueToday,countID : "count-due-today"}) %> 
+        <%-
         include('todos.ejs',{title: "Due Later",data: dueLater,countID :
         "count-due-later"}) %>
+        <%- include('todos.ejs',{title: "Completed Items",data:
+        completdItems,countID : "count-completed-items"}) %> 
       </div>
     </div>
   </body>

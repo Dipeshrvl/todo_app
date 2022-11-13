@@ -52,31 +52,43 @@ describe("Test cases for Todo manager", () => {
     let parseData = JSON.parse(res.text);
     const dueTodayLength = parseData.dueToday.length;
     const newTodo = parseData.dueToday[dueTodayLength - 1];
+    const status = newTodo.completed;
 
     res = await agent.get("/").send();
     csrf = getCsrf(res);
 
-    res = await agent.put(`/todos/${newTodo.id}/markascompleted`).send({
+    res = await agent.put(`/todos/${newTodo.id}`).send({
+      _csrf: csrf,
+    });
+    parseData = JSON.parse(res.text);
+    upadteStatus = status ? false : true;
+    expect(parseData.completed).toBe(upadteStatus);
+  });
+
+  test("should delete a Todo", async () => {
+    let res = await agent.get("/").send();
+    let csrf = getCsrf(res);
+    await agent.post("/todos").send({
+      title: "buy milk",
+      dueDate: new Date().toLocaleDateString("en-CA"),
+      completed: false,
       _csrf: csrf,
     });
 
-    parseData = JSON.parse(res.text);
-    expect(parseData.completed).toBe(true);
+    res = await agent.get("/").set("Accept", "application/json");
+    console.log(res.text);
+    let parseData = JSON.parse(res.text);
+    const dueTodayLength = parseData.dueToday.length;
+    const newTodo = parseData.dueToday[dueTodayLength - 1];
+
+    res = await agent.get("/").send();
+    csrf = getCsrf(res);
+
+    res = await agent.delete(`/todos/${newTodo.id}`).send({
+      _csrf: csrf,
+    });
+
+    const bool = Boolean(res.text);
+    expect(bool).toBe(true);
   });
-
-  // test("should delete a Todo", async () => {
-  //   const res = await agent.post("/todos").send({
-  //     title: "buy car",
-  //     dueDate: new Date().toLocaleDateString("en-CA"),
-  //     completed: false,
-  //   });
-
-  //   let parseData = JSON.parse(res.text);
-  //   const id = parseData.id;
-
-  //   console.log(id);
-  //   const deleteRes = await agent.delete(`/todos/${id}`).send();
-  //   console.log(Boolean(deleteRes.text));
-  //   expect(Boolean(deleteRes.text)).toBe(true);
-  // });
 });
